@@ -1,0 +1,10 @@
+---
+- name: copy JRE file
+  copy:
+    src: jre-8u281-linux-x64.rpm
+    dest: /tmp/jre-8u281-linux-x64.rpm
+
+- name: install JRE
+  yum:
+    name: /tmp/jre-8u281-linux-x64.rpm
+    state: present

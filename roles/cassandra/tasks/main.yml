@@ -1,0 +1,14 @@
+---
+- name: create Cassandra folder
+  file:
+    path: /cassandra
+    state: directory
+
+- name: downloading and extracting Cassandra file
+  ansible.builtin.unarchive:
+    src: https://archive.apache.org/dist/cassandra/2.2.12/apache-cassandra-2.2.12-bin.tar.gz
+    dest: /cassandra
+    remote_src: yes
+
+- name: running Cassandra
+  command: /cassandra/apache-cassandra-2.2.12/bin/cassandra -d
