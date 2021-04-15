@@ -1,0 +1,10 @@
+---
+- hosts: servers
+  remote_user: root
+  become: yes
+  vars:
+    cluster_name: cass_cluster
+    seeds: 192.168.0.201
+  roles:
+    - java
+    - cassandra
