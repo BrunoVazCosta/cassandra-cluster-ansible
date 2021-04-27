@@ -4,7 +4,7 @@
   become: yes
   vars:
     cluster_name: cass_cluster
-    # seeds: "{{ groups.seeds }}"
+    seeds: "{{ hostvars[groups['cassandras'][0]].inventory_hostname }}"
   roles:
     - java
     - cassandra

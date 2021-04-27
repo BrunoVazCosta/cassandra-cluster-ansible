@@ -1,4 +1,8 @@
 ---
+# - name: debug
+#   ansible.builtin.debug:
+#     msg: "{{ hostvars[inventory_hostname].ansible_host }}"
+
 - name: create Cassandra folder
   file:
     path: /cassandra
@@ -16,10 +20,10 @@
     dest: /cassandra/apache-cassandra-2.2.12/conf
 
 - name: start Cassandra seed
-  shell: "/cassandra/apache-cassandra-2.2.12/bin/cassandra"
+  shell: "/cassandra/apache-cassandra-2.2.12/bin/cassandra -d"
   async: 1
   poll: 0
-  when: inventory_hostname == '192.168.0.201' #{{ groups.seeds }}
+  when: inventory_hostname == seeds
 
 - name: wait Cassandra up and running
   wait_for:
@@ -27,20 +31,20 @@
     host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
     delay: 10
     timeout: 60
-  when: inventory_hostname == '192.168.0.201'
+  when: inventory_hostname == seeds
   connection: local
 
 - name: start Cassandra node
-  shell: "/cassandra/apache-cassandra-2.2.12/bin/cassandra"
+  shell: "/cassandra/apache-cassandra-2.2.12/bin/cassandra -d"
   async: 1
   poll: 0
-  when: inventory_hostname != '192.168.0.201' #{{ groups.seeds }}
+  when: inventory_hostname != seeds
 
 - name: wait Cassandra up and running
   wait_for:
     port: 9042
     host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
     delay: 10
-    timeout: 60
-  when: inventory_hostname != '192.168.0.201'
+    timeout: 120
+  when: inventory_hostname != seeds
   connection: local
