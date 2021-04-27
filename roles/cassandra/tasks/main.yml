@@ -3,12 +3,44 @@
   file:
     path: /cassandra
     state: directory
+    mode: 0777
 
-- name: downloading and extracting Cassandra file
-  ansible.builtin.unarchive:
-    src: https://archive.apache.org/dist/cassandra/2.2.12/apache-cassandra-2.2.12-bin.tar.gz
+- name: copy and extract Cassandra file
+  unarchive:
+    src: apache-cassandra-2.2.12-bin.tar.gz
     dest: /cassandra
-    remote_src: yes
 
-- name: running Cassandra
-  command: /cassandra/apache-cassandra-2.2.12/bin/cassandra -d
+- name: override cassandra.yaml
+  template:
+    src: cassandra.yaml
+    dest: /cassandra/apache-cassandra-2.2.12/conf
+
+- name: start Cassandra seed
+  shell: "/cassandra/apache-cassandra-2.2.12/bin/cassandra"
+  async: 1
+  poll: 0
+  when: inventory_hostname == '192.168.0.201' #{{ groups.seeds }}
+
+- name: wait Cassandra up and running
+  wait_for:
+    port: 9042
+    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+    delay: 10
+    timeout: 60
+  when: inventory_hostname == '192.168.0.201'
+  connection: local
+
+- name: start Cassandra node
+  shell: "/cassandra/apache-cassandra-2.2.12/bin/cassandra"
+  async: 1
+  poll: 0
+  when: inventory_hostname != '192.168.0.201' #{{ groups.seeds }}
+
+- name: wait Cassandra up and running
+  wait_for:
+    port: 9042
+    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+    delay: 10
+    timeout: 60
+  when: inventory_hostname != '192.168.0.201'
+  connection: local

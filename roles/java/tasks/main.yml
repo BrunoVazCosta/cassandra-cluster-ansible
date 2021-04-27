@@ -1,4 +1,8 @@
 ---
+# - name: debug
+#   ansible.builtin.debug:
+#     msg: "{{ inventory_hostname }}"
+
 - name: copy JRE file
   copy:
     src: jre-8u281-linux-x64.rpm
